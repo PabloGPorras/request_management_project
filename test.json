@@ -1,0 +1,270 @@
+{
+  "table_name": "users",
+  "schema": "",
+  "table_columns": [
+    {
+      "name": "user_id",
+      "type": {"type":"numeric", "length": 20},
+      "length": 10,
+      "primary_key": true,
+      "default": { "has_default": false },
+      "validates": [],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_name",
+      "type": {"type":"string", "length": 20},
+      "primary_key": false,
+      "default": { "has_default": false },
+      "validates": [
+        {
+          "validation_type": "string_length",
+          "min_length": 10,
+          "max_length": 20,
+          "error_message": "User name must be between 10 and 20 characters"
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_role",
+      "type": {"type":"string", "length": 20},
+      "primary_key": false,
+      "default": { "has_default": true, "default_value": "user" },
+      "validates": [
+        {
+          "validation_type": "valid_values",
+          "valid_values": ["user", "manager", "admin"]
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_created_datetime",
+      "type": {"type":"string", "length": 20},
+      "primary_key": false,
+      "default": { "has_default": false },
+      "validates": [
+        {
+          "validation_type": "datetime",
+          "min_date": "2018-01-01",
+          "max_date": "2018-12-31",
+          "equal_current_date": true,
+          "datetime_format": "YYYY-MM-DD HH:MM:SS"
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_last_login_date",
+      "type": {"type":"string", "length": 20, "sub_type":"date"},
+      "primary_key": false,
+      "default": { "has_default": false },
+      "validates": [
+        {
+          "validation_type": "date",
+          "equal_current_date": true,
+          "date_format": "YYYY-MM-DD"
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_last_login_datetime",
+      "type": {"type":"string", "length": 20},
+      "primary_key": false,
+      "default": { "has_default": false }, 
+      "validates": [
+        {
+          "validation_type": "datetime",
+          "min_date": "2018-01-01",
+          "max_date": "2018-12-31",
+          "datetime_format": "YYYY-MM-DD HH:MM:SS"
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_login_count",
+      "type": {"type":"numeric", "length": 20},
+      "primary_key": false,
+      "default": { "has_default": false },
+      "validates": [
+        {
+          "validation_type": "numeric_range",
+          "min_range": 1,
+          "max_range": 9999
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_business_unit",
+      "type": {"type":"string", "length": 20},
+      "primary_key": false,
+      "default": { "has_default": false },
+      "validates": [
+        {
+          "validation_type": "valid_values",
+          "valid_values": ["credit", "debit", "loan", "mortgage"]
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_teams",
+      "type": {"type": "string", "length": 20},
+      "primary_key": false,
+      "default": {"has_default": false},
+      "validates": [
+        {
+          "validation_type": "valid_values_if_column_equals",
+          "column_value_pairs": [
+            {
+              "column_name": "user_business_unit",
+              "column_value": "credit",
+              "valid_values": ["CNP", "ATO", "CPT", "FAP", "POL"]
+            },
+            {
+              "column_name": "user_business_unit",
+              "column_value": "debit",
+              "valid_values": ["CNP", "ATO", "CPT", "FAP", "POL"]
+            },
+            {
+              "column_name": "user_business_unit",
+              "column_value": "loan",
+              "valid_values": ["BNK", "ATO"]
+            },
+            {
+              "column_name": "user_business_unit",
+              "column_value": "mortgage",
+              "valid_values": ["BNK", "ATO"]
+            }
+          ]
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    },
+    {
+      "name": "user_json",
+      "type": {"type":"json", "length": 20000},
+      "default": { "has_default": false },
+      "validates": [],
+      "forms": [{ "form_name": "defaultForm", "editable": true }],
+      "json_columns": [
+        {
+          "json_column_name": "sibling_name",
+          "type": {"type":"string", "length": 20},
+          "default": { "has_default": false },
+          "validates": [
+            {
+              "validation_type": "string_length",
+              "min_length": 5,
+              "max_length": 20
+            }
+          ],
+          "forms": [{ "form_name": "defaultForm", "editable": true }]
+        },
+        {
+          "json_column_name": "sibling_age",
+          "type": {"type":"numeric"},
+          "default": { "has_default": false },
+          "validates": [
+            {
+              "validation_type": "numeric_range",
+              "min_range": 0,
+              "max_range": 100
+            }
+          ],
+          "forms": [{ "form_name": "defaultForm", "editable": true }]
+        },
+        {
+          "json_column_name": "siblings_business_unit",
+          "type": {"type":"string", "length": 20},
+          "primary_key": false,
+          "default": { "has_default": false },
+          "validates": [
+            {
+              "validation_type": "valid_values",
+              "valid_values": ["credit", "debit", "loan", "mortgage"]
+            }
+          ],
+          "forms": [{ "form_name": "defaultForm", "editable": true }]
+        },
+        {
+          "json_column_name": "sibling_team",
+          "type": {"type": "string", "length": 20},
+          "default": {"has_default": false},
+          "validates": [
+            {
+              "validation_type": "valid_values_if_column_equals",
+              "column_value_pairs": [
+                {
+                  "column_name": "siblings_business_unit",
+                  "column_value": "credit",
+                  "valid_values": ["CNP", "ATO", "CPT", "FAP", "POL"]
+                },
+                {
+                  "column_name": "siblings_business_unit",
+                  "column_value": "debit",
+                  "valid_values": ["CNP", "ATO", "CPT", "FAP", "POL"]
+                },
+                {
+                  "column_name": "siblings_business_unit",
+                  "column_value": "loan",
+                  "valid_values": ["BNK", "ATO"]
+                },
+                {
+                  "column_name": "siblings_business_unit",
+                  "column_value": "mortgage",
+                  "valid_values": ["BNK", "ATO"]
+                }
+              ]
+            }
+          ],
+          "forms": [{ "form_name": "defaultForm", "editable": true }]
+        }
+      ]
+    },
+    {
+      "name": "random_column_name",
+      "type": {"type":"string", "length": 20},
+      "primary_key": true,
+      "default": "",
+      "validates": [
+        {
+          "validation_type": "string_length",
+          "min_length": 1,
+          "max_length": 50
+        },
+        {
+          "validation_type": "numeric_range",
+          "min_range": 1,
+          "max_range": 9999
+        },
+        {
+          "validation_type": "date",
+          "min_date": "2018-01-01",
+          "max_date": "2018-12-31",
+          "date_format": "YYYY-MM-DD"
+        },
+        {
+          "validation_type": "datetime",
+          "min_date": "2018-01-01",
+          "max_date": "2018-12-31",
+          "datetime_format": "YYYY-MM-DD HH:MM:SS"
+        },
+        {
+          "validation_type": "time",
+          "time_format": "HH:MM:SS"
+        },
+        {
+          "validation_type": "valid_values_if_column_equals",
+          "column_name": "<must be a column that is defined before this column>",
+          "valid_values": ["value1", "value2"]
+        }
+      ],
+      "forms": [{ "form_name": "defaultForm", "editable": true }]
+    }
+  ]
+}
