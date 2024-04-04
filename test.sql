@@ -1,12 +1,13 @@
-WITH rule_changes AS (
+WITH rule_lines AS (
     SELECT 
         base_rule_id,
         rule_name,
-        rule_code,
         rule_state,
-        ROW_NUMBER() OVER (PARTITION BY base_rule_id, rule_name ORDER BY rule_state DESC) AS line_number
+        line_number,
+        line AS rule_code
     FROM 
-        your_table
+        your_table,
+        LATERAL SPLIT_TO_TABLE(rule_code, '\n') as t(line_number, line)
     WHERE
         rule_state IN ('testing', 'coding', 'production')
 ),
@@ -23,9 +24,9 @@ diffs AS (
         a.rule_state,
         a.rule_code AS line_details
     FROM
-        rule_changes a
+        rule_lines a
     FULL OUTER JOIN
-        rule_changes b
+        rule_lines b
     ON
         a.base_rule_id = b.base_rule_id
         AND a.rule_name = b.rule_name
