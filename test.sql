@@ -12,13 +12,13 @@ WITH RulePairs AS (
     HAVING
         COUNT(DISTINCT rule_state) = 2
 ),
-CodeDiffs AS (
+CodeLines AS (
     SELECT
         base_rule_id,
         rule_name,
-        SPLIT_PART(prod_code, '\n', seq) AS prod_line,
-        SPLIT_PART(test_code, '\n', seq) AS test_line,
-        seq AS line_number
+        SPLIT_PART(prod_code, '\n', seq8.seq) AS prod_line,
+        SPLIT_PART(test_code, '\n', seq8.seq) AS test_line,
+        seq8.seq AS line_number
     FROM
         RulePairs,
         TABLE(FLATTEN(INPUT => SEQ8(), OUTER => TRUE)) seq8
@@ -28,14 +28,18 @@ CodeDiffs AS (
 SELECT
     base_rule_id,
     rule_name,
-    IFF(prod_line IS NULL, 'inserts', IFF(test_line IS NULL, 'deletes', 'updates')) AS change_type,
-    IFF(prod_line IS NULL, CONCAT('new line ', line_number, ': ', test_line),
-        IFF(test_line IS NULL, CONCAT('deleted line ', line_number, ': ', prod_line),
-            CONCAT('previous line ', line_number, ': ', prod_line, '\nnew line ', line_number, ': ', test_line)
-        )
-    ) AS change_details
+    CASE
+        WHEN prod_line IS NULL THEN 'inserts'
+        WHEN test_line IS NULL THEN 'deletes'
+        WHEN prod_line <> test_line THEN 'updates'
+    END AS change_type,
+    CASE
+        WHEN prod_line IS NULL THEN CONCAT('new line ', line_number, ': ', test_line)
+        WHEN test_line IS NULL THEN CONCAT('deleted line ', line_number, ': ', prod_line)
+        WHEN prod_line <> test_line THEN CONCAT('previous line ', line_number, ': ', prod_line, '\nnew line ', line_number, ': ', test_line)
+    END AS change_details
 FROM
-    CodeDiffs
+    CodeLines
 WHERE
     prod_line IS DISTINCT FROM test_line
 ORDER BY
