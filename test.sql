@@ -1,47 +1,47 @@
-WITH RulePairs AS (
-    SELECT
+WITH rule_changes AS (
+    SELECT 
         base_rule_id,
         rule_name,
-        MAX(CASE WHEN rule_state = 'production' THEN rule_code ELSE NULL END) AS prod_code,
-        MAX(CASE WHEN rule_state IN ('coding', 'testing') THEN rule_code ELSE NULL END) AS test_code
-    FROM
+        rule_code,
+        rule_state,
+        ROW_NUMBER() OVER (PARTITION BY base_rule_id, rule_name ORDER BY rule_state DESC) AS line_number
+    FROM 
         your_table
-    GROUP BY
-        base_rule_id,
-        rule_name
-    HAVING
-        COUNT(DISTINCT rule_state) = 2
-),
-CodeLines AS (
-    SELECT
-        base_rule_id,
-        rule_name,
-        SPLIT_PART(prod_code, '\n', seq8.seq) AS prod_line,
-        SPLIT_PART(test_code, '\n', seq8.seq) AS test_line,
-        seq8.seq AS line_number
-    FROM
-        RulePairs,
-        TABLE(FLATTEN(INPUT => SEQ8(), OUTER => TRUE)) seq8
     WHERE
-        seq8.seq <= GREATEST(ARRAY_SIZE(SPLIT(prod_code, '\n')), ARRAY_SIZE(SPLIT(test_code, '\n')))
+        rule_state IN ('testing', 'coding', 'production')
+),
+diffs AS (
+    SELECT
+        a.base_rule_id,
+        a.rule_name,
+        CASE
+            WHEN a.rule_code IS NULL THEN 'delete'
+            WHEN b.rule_code IS NULL THEN 'insert'
+            ELSE 'update'
+        END AS change_type,
+        a.line_number,
+        a.rule_state,
+        a.rule_code AS line_details
+    FROM
+        rule_changes a
+    FULL OUTER JOIN
+        rule_changes b
+    ON
+        a.base_rule_id = b.base_rule_id
+        AND a.rule_name = b.rule_name
+        AND a.line_number = b.line_number
+        AND a.rule_state = 'testing/coding'
+        AND b.rule_state = 'production'
+    WHERE
+        a.rule_code <> b.rule_code
+        OR a.rule_code IS NULL
+        OR b.rule_code IS NULL
 )
 SELECT
-    base_rule_id,
-    rule_name,
-    CASE
-        WHEN prod_line IS NULL THEN 'inserts'
-        WHEN test_line IS NULL THEN 'deletes'
-        WHEN prod_line <> test_line THEN 'updates'
-    END AS change_type,
-    CASE
-        WHEN prod_line IS NULL THEN CONCAT('new line ', line_number, ': ', test_line)
-        WHEN test_line IS NULL THEN CONCAT('deleted line ', line_number, ': ', prod_line)
-        WHEN prod_line <> test_line THEN CONCAT('previous line ', line_number, ': ', prod_line, '\nnew line ', line_number, ': ', test_line)
-    END AS change_details
+    *
 FROM
-    CodeLines
-WHERE
-    prod_line IS DISTINCT FROM test_line
+    diffs
 ORDER BY
     base_rule_id,
+    rule_name,
     line_number;
