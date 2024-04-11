@@ -34,6 +34,7 @@ quit;
 /* Loop through fields and byte positions */
 data _null_;
     set fields;
+    length query $2000; /* Ensure the query variable can hold the SQL statement */
     do byte_position = 1 to character_maximum_length;
         query = cats(
             "insert into byte_analysis_results (field_name, byte_position, byte_value, occurrence_count) ",
@@ -42,11 +43,21 @@ data _null_;
             "where transaction_date between '", "&start_date", "' and '", "&end_date", "' ",
             "group by byte_value order by byte_value"
         );
-        /* Execute the insert query */
-        proc sql;
-            connect to odbc (dsn='your_dsn' user='your_username' password='your_password');
-            execute ( &query ) by odbc;
-            disconnect from odbc;
-        quit;
+        /* Store the query for later execution */
+        call symputx(cats('query',byte_position), query);
     end;
 run;
+
+/* Execute the stored queries */
+%macro execute_queries;
+    %do i = 1 %to &sqlobs;
+        %let current_query = &&query&i;
+        proc sql;
+            connect to odbc (dsn='your_dsn' user='your_username' password='your_password');
+            execute (&current_query) by odbc;
+            disconnect from odbc;
+        quit;
+    %end;
+%mend execute_queries;
+
+%execute_queries;
