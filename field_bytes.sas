@@ -26,7 +26,8 @@ proc sql noprint;
     create table fields as select * from connection to odbc (
         select column_name, character_maximum_length 
         from information_schema.columns 
-        where table_name = "&table_name"
+        where table_name = '" || trim(&table_name) || "'
+
     );
     disconnect from odbc;
 quit;
@@ -39,8 +40,8 @@ data _null_;
         query = cats(
             "insert into byte_analysis_results (field_name, byte_position, byte_value, occurrence_count) ",
             "select '", column_name, "' as field_name, ", byte_position, " as byte_position, byte_substr(", column_name, ", ", byte_position, ", 1) as byte_value, count(*) as occurrence_count ",
-            "from ", "&table_name", " ",
-            "where transaction_date between '", "&start_date", "' and '", "&end_date", "' ",
+            "from ", &table_name, " ",
+            "where transaction_date between '", &start_date, "' and '", &end_date, "' ",
             "group by byte_value order by byte_value"
         );
         /* Store the query for later execution */
