@@ -10,45 +10,42 @@ conn = snowflake.connector.connect(
     schema='your_schema'
 )
 
-# Define the table and date range
+# Define the table
 table_name = 'transaction_table'
-start_date = '2023-03-01'
-end_date = '2023-03-31'
 
 # Create a result table in Snowflake
 conn.cursor().execute(
     """
-    CREATE OR REPLACE TABLE byte_analysis_results (
+    CREATE OR REPLACE TABLE empty_char_positions (
         field_name VARCHAR(255),
-        byte_position INT,
-        byte_value VARCHAR(1),
-        occurrence_count INT
+        char_position INT
     )
     """
 )
 
-# Fetch the list of fields
+# Fetch the list of string fields
 fields = conn.cursor().execute(
     f"""
     SELECT COLUMN_NAME, CHARACTER_MAXIMUM_LENGTH
     FROM INFORMATION_SCHEMA.COLUMNS
     WHERE TABLE_NAME = '{table_name}'
+    AND DATA_TYPE LIKE '%CHAR%'  -- Assuming you're interested in string fields
     """
 ).fetchall()
 
-# Loop through fields and byte positions
-for field_name, byte_length in fields:
-    for byte_position in range(1, byte_length + 1):
-        # Construct the query
-        query = (
-            f"INSERT INTO byte_analysis_results (field_name, byte_position, byte_value, occurrence_count) "
-            f"SELECT '{field_name}' AS field_name, {byte_position} AS byte_position, BYTE_SUBSTR({field_name}, {byte_position}, 1) AS byte_value, COUNT(*) AS occurrence_count "
-            f"FROM {table_name} "
-            f"WHERE transaction_date BETWEEN '{start_date}' AND '{end_date}' "
-            f"GROUP BY byte_value ORDER BY byte_value"
-        )
-        # Execute the query
-        conn.cursor().execute(query)
+# Loop through fields and character positions
+for field_name, char_length in fields:
+    if char_length is not None:
+        for char_position in range(1, char_length + 1):
+            # Construct the query to find empty characters
+            query = (
+                f"INSERT INTO empty_char_positions (field_name, char_position) "
+                f"SELECT '{field_name}' AS field_name, {char_position} AS char_position "
+                f"FROM {table_name} "
+                f"WHERE SUBSTR({field_name}, {char_position}, 1) = ' '"
+            )
+            # Execute the query
+            conn.cursor().execute(query)
 
 # Close the connection
 conn.close()
