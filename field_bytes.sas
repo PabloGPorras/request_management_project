@@ -35,19 +35,22 @@ quit;
 /* Loop through fields and byte positions */
 data _null_;
     set fields;
-    length query $2000; /* Ensure the query variable can hold the SQL statement */
-    do byte_position = 1 to character_maximum_length;
-        query = cats(
-            "insert into byte_analysis_results (field_name, byte_position, byte_value, occurrence_count) ",
-            "select '", column_name, "' as field_name, ", byte_position, " as byte_position, byte_substr(", column_name, ", ", byte_position, ", 1) as byte_value, count(*) as occurrence_count ",
-            "from ", &table_name, " ",
-            "where transaction_date between '", &start_date, "' and '", &end_date, "' ",
-            "group by byte_value order by byte_value"
-        );
-        /* Store the query for later execution */
-        call symputx(cats('query',byte_position), query);
+    if character_maximum_length > 0 then do; /* Check that character_maximum_length is positive */
+        do byte_position = 1 to character_maximum_length;
+            query = cats(
+                "insert into byte_analysis_results (field_name, byte_position, byte_value, occurrence_count) ",
+                "select '", column_name, "' as field_name, ", byte_position, " as byte_position, byte_substr(", column_name, ", ", byte_position, ", 1) as byte_value, count(*) as occurrence_count ",
+                "from ", symget('table_name'), " ",  /* Use symget to retrieve the macro variable value */
+                "where transaction_date between '", symget('start_date'), "' and '", symget('end_date'), "' ",
+                "group by byte_value order by byte_value"
+            );
+            /* Store the query for later execution */
+            call symputx(cats('query',byte_position), query);
+        end;
     end;
+    else put "WARNING: Invalid character_maximum_length for field " column_name;
 run;
+
 
 /* Execute the stored queries */
 %macro execute_queries;
