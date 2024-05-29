@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Snowflake Query</title>
+</head>
+<body>
+    <h1>Snowflake Query Result</h1>
+    <button id="queryButton">Run Query</button>
+    <pre id="result"></pre>
+
+    <script>
+        document.getElementById('queryButton').addEventListener('click', async () => {
+            try {
+                const response = await fetch('http://localhost:3000/query');
+                const data = await response.json();
+                document.getElementById('result').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('result').textContent = 'Error: ' + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
