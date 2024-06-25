@@ -9,3 +9,10 @@ Secondly, the fraud tagging macro included with the package has presented multip
 These issues have not only impacted our productivity but have also raised doubts about the reliability of the delivered package. We expect a thorough investigation into the root cause of these problems and a prompt resolution to ensure the smooth integration and operation of the fraud model and tagging macro in our environment.
 
 We value our partnership with SAS and trust that you will address these concerns with the urgency and diligence they demand. Please provide us with a detailed action plan and estimated timelines for resolution as soon as possible.
+
+Sincerely,
+
+[Your Name]
+[Your Title]
+[Your Bank Name]
+[Your Contact Information]
