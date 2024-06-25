@@ -1,0 +1,11 @@
+Dear SAS Team,
+
+I am writing to express our serious concerns regarding the recent fraud model package and accompanying tagging macro delivered to [Your Bank Name]. We have encountered two significant issues that have disrupted our workflow and require immediate attention.
+
+Firstly, upon installation of the initial model package iteration in our lower environment, we observed that the model produced a score of zero for all transactions. This was thankfully resolved in the second iteration, but it caused unnecessary delays and raised concerns about the initial quality assurance process.
+
+Secondly, the fraud tagging macro included with the package has presented multiple challenges. After installation in our lower environment, the macro's initial run disrupted our pipeline. While we were able to restore functionality by deleting and recreating a specific file, subsequent job runs have generated errors in the log and have failed to produce any tagged transactions in the output file.
+
+These issues have not only impacted our productivity but have also raised doubts about the reliability of the delivered package. We expect a thorough investigation into the root cause of these problems and a prompt resolution to ensure the smooth integration and operation of the fraud model and tagging macro in our environment.
+
+We value our partnership with SAS and trust that you will address these concerns with the urgency and diligence they demand. Please provide us with a detailed action plan and estimated timelines for resolution as soon as possible.
